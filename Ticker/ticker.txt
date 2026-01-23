@@ -1,0 +1,11 @@
+Requirements:
+- Continuous speed
+- Infinite loop with no visual disparities
+- Pause and resume without jumping
+- No DOM duplication required, optionally
+
+Accessibility:
+- Pause on hover and focus
+- Respect "prefers-reduced-motion: reduce"
+- Optional pause/play control
+

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ticker</title>
+</head>
+
+<body>
+    <div data-ticker>hello ticker</div>
+    <script src="./ticker.js"></script>
+    <script>
+        const el = document.querySelector('[data-ticker]');
+        const ticker = new Ticker(el);
+        console.log('window.Ticker?', window.Ticker)
+    </script>
+</body>
+
+</html>
