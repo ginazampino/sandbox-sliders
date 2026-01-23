@@ -3,10 +3,30 @@
 
 <head>
     <title>ticker</title>
+    <style>
+        .ticker {
+            width: 300px;
+            overflow: hidden;
+            border: 1px solid gray;
+        }
+
+        .ticker__track {
+            display: inline-flex;
+            gap: 16px;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 
 <body>
-    <div data-ticker>hello ticker</div>
+    <div data-ticker class="ticker">
+        <div class="ticker__track">
+            <span class="ticker__item">One</span>
+            <span class="ticker__item">Two</span>
+            <span class="ticker__item">Three</span>
+            <span class="ticker__item">Four</span>
+        </div>
+    </div>
     <script src="./ticker.js"></script>
     <script>
         const el = document.querySelector('[data-ticker]');
