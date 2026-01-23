@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>sandbox-swiper</title>
+    <link href=" https://cdn.jsdelivr.net/npm/swiper@12.0.3/swiper-bundle.min.css " rel="stylesheet">
+    <script src=" https://cdn.jsdelivr.net/npm/swiper@12.0.3/swiper-bundle.min.js "></script>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <main>
+        <h1>Marquee</h1>
+        <div class="ticker" id="ticker">
+            <div class="ticker__track">
+                <div class="ticker__item">Slide 1</div>
+                <div class="ticker__item">Slide 2</div>
+                <div class="ticker__item">Slide 3</div>
+                <div class="ticker__item">Slide 4</div>
+            </div>
+        </div>
+
+        <!-- <h1>Slider Demos</h1>
+        <h2>Example 1) Test</h2>
+        <p>Slow-moving marquee "ticker" with pause on hover, and ideally controls.</p>
+        <div class="swiper swiper-marquee">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide demo-slide">Slide 1</div>
+                <div class="swiper-slide demo-slide">Slide 2</div>
+                <div class="swiper-slide demo-slide">Slide 3</div>
+                <div class="swiper-slide demo-slide">Slide 4</div>
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div> -->
+    </main>
+    <script>
+        const ticker = document.getElementById('ticker');
+        const track = ticker.querySelector('.ticker__track');
+
+        let rafId = null;
+        let lastTs = null;
+        let x = 0;
+
+        // pixels per second (constant velocity)
+        let pxPerSecond = 80;
+
+        // Cache gap (from CSS)
+        function getGapPx() {
+            const styles = getComputedStyle(track);
+            const gap = parseFloat(styles.columnGap || styles.gap || '0');
+            return Number.isFinite(gap) ? gap : 0;
+        }
+
+        function step(ts) {
+            if (lastTs == null) lastTs = ts;
+            const dt = (ts - lastTs) / 1000;
+            lastTs = ts;
+
+            x -= pxPerSecond * dt;
+
+            // recycle items from front to back when fully offscreen
+            const gap = getGapPx();
+            while (track.firstElementChild) {
+                const first = track.firstElementChild;
+                const firstWidth = first.getBoundingClientRect().width;
+
+                // When the first item has moved completely out of view (including the gap)
+                if (-x >= firstWidth + gap) {
+                    x += firstWidth + gap;        // keep motion continuous
+                    track.appendChild(first);      // move the same element to the end
+                } else {
+                    break;
+                }
+            }
+
+            track.style.transform = `translate3d(${x}px, 0, 0)`;
+            rafId = requestAnimationFrame(step);
+        }
+
+        function start() {
+            if (rafId) return;
+            lastTs = null;
+            rafId = requestAnimationFrame(step);
+        }
+
+        function stop() {
+            if (!rafId) return;
+            cancelAnimationFrame(rafId);
+            rafId = null;
+            lastTs = null;
+        }
+
+        // Pause on hover
+        ticker.addEventListener('mouseenter', stop);
+        ticker.addEventListener('mouseleave', start);
+
+        // Start running
+        start();
+
+
+        // // Initiate the first example of Swiper:
+        // const swiper = new Swiper('.swiper-marquee', {
+        //     // General settings:
+        //     direction: 'horizontal',
+        //     navigation: {
+        //         nextEl: '.swiper-button-next',
+        //         prevEl: '.swiper-button-prev'
+        //     },
+        //     spaceBetween: 16,
+        //     freeMode: { enabled: true, momentum: false },
+        //     // Marquee settings:
+        //     autoplay: {
+        //         delay: 1,
+        //         disableOnInteraction: true
+        //     },
+        //     slidesPerView: 'auto',
+        //     speed: 5000,
+        //     loop: true,
+        //     loopAdditionalSlides: 10
+        // });
+
+        // const marqueeEl = document.querySelector('.swiper-marquee');
+        // let originalTranslate = 0;
+        // let originalSpeed = swiper.params.speed;
+
+        // function stopMarquee() {
+        //     originalTranslate = swiper.getTranslate();
+        //     console.log('stop')
+        //     swiper.autoplay.stop();
+        //     swiper.animating = false;
+        //     swiper.setTransition(0);
+        //     swiper.setTranslate(originalTranslate);
+        // };
+
+        // function resumeMarquee() {
+        //     console.log('start')
+        //     swiper.setTransition(originalSpeed);
+        //     requestAnimationFrame(() => {
+        //         swiper.autoplay.start();
+        //     });
+        // };
+
+        // marqueeEl.addEventListener('mouseenter', stopMarquee);
+        // marqueeEl.addEventListener('mouseleave', resumeMarquee);
+    </script>
+</body>
+
+</html>

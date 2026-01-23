@@ -10,139 +10,104 @@
 
 <body>
     <main>
-        <h1>Marquee</h1>
-        <div class="ticker" id="ticker">
-            <div class="ticker__track">
-                <div class="ticker__item">Slide 1</div>
-                <div class="ticker__item">Slide 2</div>
-                <div class="ticker__item">Slide 3</div>
-                <div class="ticker__item">Slide 4</div>
+        <h1>Slider</h1>
+        <div class="swiper-container">
+            <div class="swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">Slide 1</div>
+                    <div class="swiper-slide">Slide 2</div>
+                    <div class="swiper-slide">Slide 3</div>
+                    <div class="swiper-slide">Slide 4</div>
+                    <div class="swiper-slide">Slide 5</div>
+                    <div class="swiper-slide">Slide 6</div>
+                </div>
             </div>
         </div>
-
-        <!-- <h1>Slider Demos</h1>
-        <h2>Example 1) Test</h2>
-        <p>Slow-moving marquee "ticker" with pause on hover, and ideally controls.</p>
-        <div class="swiper swiper-marquee">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide demo-slide">Slide 1</div>
-                <div class="swiper-slide demo-slide">Slide 2</div>
-                <div class="swiper-slide demo-slide">Slide 3</div>
-                <div class="swiper-slide demo-slide">Slide 4</div>
-            </div>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-button-next"></div>
-        </div> -->
     </main>
     <script>
-        const ticker = document.getElementById('ticker');
-        const track = ticker.querySelector('.ticker__track');
+        const container = document.querySelector('.swiper-container');
+        const el = document.querySelector(".swiper");
 
-        let rafId = null;
-        let lastTs = null;
-        let x = 0;
+        const swiper = new Swiper('.swiper', {
+            slidesPerView: 'auto',
+            spaceBetween: 20,
+            allowTouchMove: false,
+            speed: 0,
+            loop: false
+        });
 
-        // pixels per second (constant velocity)
-        let pxPerSecond = 80;
+        const wrapper = el.querySelector(".swiper-wrapper");
 
-        // Cache gap (from CSS)
-        function getGapPx() {
-            const styles = getComputedStyle(track);
-            const gap = parseFloat(styles.columnGap || styles.gap || '0');
-            return Number.isFinite(gap) ? gap : 0;
+        // 1) Duplicate slides once
+        const originalSlides = Array.from(wrapper.children);
+        originalSlides.forEach((slide) => wrapper.appendChild(slide.cloneNode(true)));
+
+        // 2) Measure the width of the ORIGINAL set (before duplicates)
+        function measureLoopWidth() {
+            // total width from first original slide start to last original slide end
+            const first = originalSlides[0];
+            const last = originalSlides[originalSlides.length - 1];
+
+            const firstLeft = first.offsetLeft;
+            const lastRight = last.offsetLeft + last.offsetWidth;
+
+            return lastRight - firstLeft;
         }
 
-        function step(ts) {
-            if (lastTs == null) lastTs = ts;
-            const dt = (ts - lastTs) / 1000;
-            lastTs = ts;
+        let loopWidth = 0;
 
-            x -= pxPerSecond * dt;
+        function recalc() {
+            swiper.update();           // let Swiper recalc sizes
+            loopWidth = measureLoopWidth();
+        }
 
-            // recycle items from front to back when fully offscreen
-            const gap = getGapPx();
-            while (track.firstElementChild) {
-                const first = track.firstElementChild;
-                const firstWidth = first.getBoundingClientRect().width;
+        // call once and on resize
+        recalc();
+        window.addEventListener("resize", recalc);
 
-                // When the first item has moved completely out of view (including the gap)
-                if (-x >= firstWidth + gap) {
-                    x += firstWidth + gap;        // keep motion continuous
-                    track.appendChild(first);      // move the same element to the end
-                } else {
-                    break;
-                }
+        // rAF ticker
+        let rafId = 0;
+        let lastTime = 0;
+        let x = 0; // our own translate in px (negative = moving left)
+
+        const PPS = 80; // px/sec
+
+        function tick(t) {
+            if (!lastTime) lastTime = t;
+            const dt = (t - lastTime) / 1000;
+            lastTime = t;
+
+            x -= PPS * dt;
+
+            // when we've moved past one full set, wrap around
+            if (loopWidth > 0 && -x >= loopWidth) {
+                x += loopWidth; // jump forward by exactly one set width (seamless)
             }
 
-            track.style.transform = `translate3d(${x}px, 0, 0)`;
-            rafId = requestAnimationFrame(step);
+            swiper.setTransition(0);
+            swiper.setTranslate(x);
+
+            rafId = requestAnimationFrame(tick);
         }
 
-        function start() {
+        function play() {
             if (rafId) return;
-            lastTs = null;
-            rafId = requestAnimationFrame(step);
+            lastTime = 0;
+            rafId = requestAnimationFrame(tick);
         }
 
-        function stop() {
-            if (!rafId) return;
+        function pause() {
             cancelAnimationFrame(rafId);
-            rafId = null;
-            lastTs = null;
+            rafId = 0;
+            lastTime = 0;
         }
 
-        // Pause on hover
-        ticker.addEventListener('mouseenter', stop);
-        ticker.addEventListener('mouseleave', start);
+        play();
 
-        // Start running
-        start();
+        container.addEventListener("mouseenter", pause);
+        container.addEventListener("mouseleave", play);
 
 
-        // // Initiate the first example of Swiper:
-        // const swiper = new Swiper('.swiper-marquee', {
-        //     // General settings:
-        //     direction: 'horizontal',
-        //     navigation: {
-        //         nextEl: '.swiper-button-next',
-        //         prevEl: '.swiper-button-prev'
-        //     },
-        //     spaceBetween: 16,
-        //     freeMode: { enabled: true, momentum: false },
-        //     // Marquee settings:
-        //     autoplay: {
-        //         delay: 1,
-        //         disableOnInteraction: true
-        //     },
-        //     slidesPerView: 'auto',
-        //     speed: 5000,
-        //     loop: true,
-        //     loopAdditionalSlides: 10
-        // });
-
-        // const marqueeEl = document.querySelector('.swiper-marquee');
-        // let originalTranslate = 0;
-        // let originalSpeed = swiper.params.speed;
-
-        // function stopMarquee() {
-        //     originalTranslate = swiper.getTranslate();
-        //     console.log('stop')
-        //     swiper.autoplay.stop();
-        //     swiper.animating = false;
-        //     swiper.setTransition(0);
-        //     swiper.setTranslate(originalTranslate);
-        // };
-
-        // function resumeMarquee() {
-        //     console.log('start')
-        //     swiper.setTransition(originalSpeed);
-        //     requestAnimationFrame(() => {
-        //         swiper.autoplay.start();
-        //     });
-        // };
-
-        // marqueeEl.addEventListener('mouseenter', stopMarquee);
-        // marqueeEl.addEventListener('mouseleave', resumeMarquee);
     </script>
 </body>
 

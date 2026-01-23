@@ -25,66 +25,26 @@ h2 {
     margin: 30px 0;
 }
 
-.ticker {
-    width: 600px;
-    /* whatever your layout needs */
+.swiper-container {
+    width: 1280px;
+    max-width: 100%;
+}
+
+.swiper {
     overflow: hidden;
-}
-
-.ticker__track {
-    display: inline-flex;
-    gap: 16px;
-    white-space: nowrap;
-    will-change: transform;
-}
-
-.ticker__item {
-    padding: 12px 24px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    white-space: nowrap;
-}
-
-
-/* 
-.swiper-marquee {
-    height: 400px;
-    width: 600px;
 }
 
 .swiper-wrapper {
     transition-timing-function: linear !important;
+    align-items: center;
+    width: 100%;
+    will-change: transform;
 }
 
-.demo-slide {
+.swiper-slide {
+    background-color: lightblue;
+    width: 12rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 50px;
-    color: white;
 }
-
-.demo-slide:nth-child(odd) {
-    background-color: cornflowerblue;
-}
-
-.demo-slide:nth-child(even) {
-    background-color: lightsalmon
-} */
-
-/* Navigation buttons styling */
-/* .swiper-button-next,
-.swiper-button-prev {
-    color: #333;
-    background: rgba(255, 255, 255, 0.8);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    z-index: 10;
-}
-
-.swiper-button-next:after,
-.swiper-button-prev:after {
-    font-size: 20px;
-    font-weight: bold;
-} */
