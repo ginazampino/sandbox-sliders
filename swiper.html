@@ -67,8 +67,8 @@
             height: 360px;
         }
 
-        .swiper-slide {
-            width: 240px;
+        .swiper.single .swiper-slide {
+            flex: 0 0 240px;
         }
 
         .swiper-button-toggle {
@@ -95,7 +95,7 @@
     <main>
         <h1>Swiper - Single</h1>
         <div class="swiper-container">
-            <div class="swiper single">
+            <div class="swiper single" data-autoplay="true" data-view="auto" data-center="true" data-bounds="true">
                 <div class="swiper-wrapper">
                     <div class="swiper-slide">Slide 1</div>
                     <div class="swiper-slide">Slide 2</div>
@@ -115,7 +115,7 @@
         </div>
         <h1>Swiper - Group</h1>
         <div class="swiper-container">
-            <div class="swiper group" data-view="3" data-group="3">
+            <div class="swiper group" data-autoplay="true" data-view="3" data-group="3">
                 <div class="swiper-wrapper">
                     <div class="swiper-slide">Slide 1</div>
                     <div class="swiper-slide">Slide 2</div>
@@ -136,7 +136,7 @@
     </main>
 
     <script>
-        window.addEventListener('load', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             const sliders = document.querySelectorAll('.swiper-container');
 
             sliders.forEach((slider) => {
@@ -144,34 +144,64 @@
 
                 if (!el) return;
 
-                el.setAttribute('tabindex', '0');
-
-                const swiper = new Swiper(el, {
-                    a11y: el.dataset.a11y || true,
-                    keyboard: el.dataset.keyboard || true,
-                    navigation: el.dataset.navigation || {
-                        prevEl: '.swiper-button-prev',
-                        nextEl: '.swiper-button-next',
-                        addIcons: el.dataset.icons || false
-                    },
-                    rewind: el.dataset.rewind || true,
-                    loop: el.dataset.loop || false,
-                    simulateTouch: el.dataset.touch || true,
-                    autoplay: el.dataset.autoplay || {
-                        delay: el.dataset.delay || 3000,
-                        pauseOnMouseEnter: true
-                    },
-                    speed: el.dataset.speed || 500,
-                    spaceBetween: el.dataset.space || 16,
-                    slidesPerView: el.dataset.view || 'auto',
-                    slidesPerGroup: el.dataset.group || 1,
-                    centeredSlides: el.dataset.center || false,
-                    centeredSlidesBounds: el.dataset.bounds || false,
-                    updateOnWindowResize: el.dataset.update || false
-                });
-
                 const prevButton = el.querySelector('.swiper-button-prev');
                 const nextButton = el.querySelector('.swiper-button-next');
+                const toggleButton = el.querySelector('.swiper-button-toggle');
+
+                el.setAttribute('tabindex', '0');
+
+                function asBool(value) {
+                    if (value == null) {
+                        return undefined;
+                    } else {
+                        return value === 'true' || value === '1' || value === '';
+                    };
+                };
+
+                function asNum(value) {
+                    if (value == null || value == '') {
+                        return undefined;
+                    } else {
+                        const number = Number(value);
+                        return Number.isFinite(number) ? number : undefined;
+                    };
+                };
+
+                function asSlidesPerView(value) {
+                    if (value == null || value == '') {
+                        return undefined;
+                    } else if (value == 'auto') {
+                        return 'auto';
+                    } else {
+                        const number = Number(value);
+                        return Number.isFinite(number) ? number : undefined;
+                    };
+                };
+
+                const swiper = new Swiper(el, {
+                    a11y: asBool(el.dataset.a11y) ?? true,
+                    keyboard: asBool(el.dataset.keyboard) ?? true,
+                    navigation: (prevButton && nextButton) ? {
+                        prevEl: prevButton,
+                        nextEl: nextButton,
+                        addIcons: asBool(el.dataset.icons) ?? false
+                    } : undefined,
+                    rewind: asBool(el.dataset.rewind) ?? true,
+                    loop: asBool(el.dataset.loop) ?? false,
+                    simulateTouch: asBool(el.dataset.touch) ?? true,
+                    autoplay: (asBool(el.dataset.autoplay) ?? false) ? {
+                        delay: asNum(el.dataset.delay) ?? 3000,
+                        pauseOnMouseEnter: asBool(el.dataset.pause) ?? true,
+                    } : false,
+                    speed: asNum(el.dataset.speed) ?? 500,
+                    spaceBetween: asNum(el.dataset.space) ?? 16,
+                    slidesPerView: asSlidesPerView(el.dataset.view) ?? 'auto',
+                    slidesPerGroup: asNum(el.dataset.group) ?? 1,
+                    initialSlide: asNum(el.dataset.initial) ?? 0,
+                    centeredSlides: asBool(el.dataset.center) ?? false,
+                    centeredSlidesBounds: asBool(el.dataset.bounds) ?? false,
+                    updateOnWindowResize: asBool(el.dataset.update) ?? true
+                });
 
                 if (prevButton) {
                     prevButton.innerHTML = '&#128896';
@@ -181,9 +211,9 @@
                     nextButton.innerHTML = '&#128898';
                 };
 
-                const toggleButton = el.querySelector('.swiper-button-toggle');
+                const autoplayEnabled = asBool(el.dataset.autoplay) ?? false;
 
-                if (toggleButton) {
+                if (toggleButton && autoplayEnabled) {
                     toggleButton.innerHTML = '&#9208';
                     toggleButton.setAttribute('tabindex', '0');
                     toggleButton.setAttribute('role', 'button');
@@ -217,6 +247,8 @@
                             toggleSlider();
                         };
                     });
+                } else if (toggleButton) {
+                    toggleButton.style.display = 'none';
                 };
             });
         });
