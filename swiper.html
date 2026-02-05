@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Swiper</title>
+    <link href=" https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css " rel="stylesheet">
+    <script src=" https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js "></script>
+    <style>
+        .swiper {
+            border: 2px solid transparent;
+            border-radius: .75rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .swiper-wrapper {
+            z-index: -1
+        }
+
+        .swiper-slide {
+            align-items: center;
+            background: #eee;
+            border-radius: .75rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .swiper-button-prev,
+        .swiper-button-next,
+        .swiper-button-toggle {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: .75rem;
+            opacity: .5;
+            transition: .2s ease-in-out;
+            z-index: 5;
+        }
+
+        .swiper-button-toggle {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            left: 0;
+            position: absolute;
+            top: 0;
+        }
+
+        .swiper-button-prev:hover,
+        .swiper-button-prev:focus,
+        .swiper-button-next:hover,
+        .swiper-button-next:focus,
+        .swiper-button-toggle:hover,
+        .swiper-button-toggle:focus {
+            opacity: 1;
+        }
+
+        .swiper:focus,
+        .swiper-button-prev:focus,
+        .swiper-button-next:focus,
+        .swiper-button-toggle:focus {
+            border-color: #000;
+        }
+
+        /* Demo only: */
+        .swiper.single,
+        .swiper.group {
+            height: 360px;
+        }
+
+        .swiper-slide {
+            width: 240px;
+        }
+
+        .swiper-button-toggle {
+            font-size: 2em;
+            height: 44px;
+            margin-left: .3rem;
+        }
+
+        .swiper-button-prev,
+        .swiper-button-next {
+            font-size: 2.5em;
+        }
+
+        .swiper-button-prev,
+        .swiper-button-next,
+        .swiper-button-toggle {
+            color: gray;
+            width: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Swiper - Single</h1>
+        <div class="swiper-container">
+            <div class="swiper single">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">Slide 1</div>
+                    <div class="swiper-slide">Slide 2</div>
+                    <div class="swiper-slide">Slide 3</div>
+                    <div class="swiper-slide">Slide 4</div>
+                    <div class="swiper-slide">Slide 5</div>
+                    <div class="swiper-slide">Slide 6</div>
+                    <div class="swiper-slide">Slide 7</div>
+                    <div class="swiper-slide">Slide 8</div>
+                    <div class="swiper-slide">Slide 9</div>
+                    <div class="swiper-slide">Slide 10</div>
+                </div>
+                <div class="swiper-button-toggle"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+        </div>
+        <h1>Swiper - Group</h1>
+        <div class="swiper-container">
+            <div class="swiper group" data-view="3" data-group="3">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">Slide 1</div>
+                    <div class="swiper-slide">Slide 2</div>
+                    <div class="swiper-slide">Slide 3</div>
+                    <div class="swiper-slide">Slide 4</div>
+                    <div class="swiper-slide">Slide 5</div>
+                    <div class="swiper-slide">Slide 6</div>
+                    <div class="swiper-slide">Slide 7</div>
+                    <div class="swiper-slide">Slide 8</div>
+                    <div class="swiper-slide">Slide 9</div>
+                    <div class="swiper-slide">Slide 10</div>
+                </div>
+                <div class="swiper-button-toggle"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        window.addEventListener('load', () => {
+            const sliders = document.querySelectorAll('.swiper-container');
+
+            sliders.forEach((slider) => {
+                const el = slider.querySelector('.swiper');
+
+                if (!el) return;
+
+                el.setAttribute('tabindex', '0');
+
+                const swiper = new Swiper(el, {
+                    a11y: el.dataset.a11y || true,
+                    keyboard: el.dataset.keyboard || true,
+                    navigation: el.dataset.navigation || {
+                        prevEl: '.swiper-button-prev',
+                        nextEl: '.swiper-button-next',
+                        addIcons: el.dataset.icons || false
+                    },
+                    rewind: el.dataset.rewind || true,
+                    loop: el.dataset.loop || false,
+                    simulateTouch: el.dataset.touch || true,
+                    autoplay: el.dataset.autoplay || {
+                        delay: el.dataset.delay || 3000,
+                        pauseOnMouseEnter: true
+                    },
+                    speed: el.dataset.speed || 500,
+                    spaceBetween: el.dataset.space || 16,
+                    slidesPerView: el.dataset.view || 'auto',
+                    slidesPerGroup: el.dataset.group || 1,
+                    centeredSlides: el.dataset.center || false,
+                    centeredSlidesBounds: el.dataset.bounds || false,
+                    updateOnWindowResize: el.dataset.update || false
+                });
+
+                const prevButton = el.querySelector('.swiper-button-prev');
+                const nextButton = el.querySelector('.swiper-button-next');
+
+                if (prevButton) {
+                    prevButton.innerHTML = '&#128896';
+                };
+
+                if (nextButton) {
+                    nextButton.innerHTML = '&#128898';
+                };
+
+                const toggleButton = el.querySelector('.swiper-button-toggle');
+
+                if (toggleButton) {
+                    toggleButton.innerHTML = '&#9208';
+                    toggleButton.setAttribute('tabindex', '0');
+                    toggleButton.setAttribute('role', 'button');
+                    toggleButton.setAttribute('aria-label', 'Stop slider');
+
+                    function stopSlider() {
+                        swiper.autoplay.stop();
+                        toggleButton.innerHTML = '&#11208';
+                        toggleButton.setAttribute('aria-label', 'Start slider');
+                    };
+
+                    function startSlider() {
+                        swiper.autoplay.start();
+                        toggleButton.innerHTML = '&#9208';
+                        toggleButton.setAttribute('aria-label', 'Stop slider');
+                    };
+
+                    function toggleSlider() {
+                        if (swiper.autoplay.running) {
+                            stopSlider();
+                        } else startSlider();
+                    };
+
+                    toggleButton.addEventListener('click', () => {
+                        toggleSlider();
+                    });
+
+                    toggleButton.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            toggleSlider();
+                        };
+                    });
+                };
+            });
+        });
+    </script>
+</body>
+
+</html>
