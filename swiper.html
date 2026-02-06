@@ -210,6 +210,8 @@
                 const getCountFor = (el, size, fallback = 1) => {
                     const list = parseNumList(el.dataset.count);
 
+                    if (!list.length) return null;
+
                     const sm = list[0] ?? fallback;
                     const md = list[1] ?? sm;
                     const lg = list[2] ?? md;
@@ -257,6 +259,8 @@
                     if (mode === 'group') {
                         const count = getCountFor(el, size);
 
+                        if (!count) return groupConfig;
+
                         return {
                             slidesPerView: 'auto',
                             slidesPerGroup: count,
@@ -265,7 +269,7 @@
                             centeredSlidesBounds: false,
                             centerInsufficientSlides: true
                         };
-                    }
+                    };
 
                     if (mode === 'page') {
                         const count = getCountFor(el, size);
