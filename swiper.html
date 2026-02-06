@@ -6,6 +6,18 @@
     <link href=" https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css " rel="stylesheet">
     <script src=" https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js "></script>
     <style>
+        html,
+        body,
+        main {
+            width: 100%;
+            margin: 0;
+        }
+
+        .swiper-container {
+            max-width: 100%;
+            overflow: hidden;
+        }
+
         .swiper {
             border: 2px solid transparent;
             border-radius: .75rem;
@@ -13,15 +25,12 @@
             position: relative;
         }
 
-        .swiper-wrapper {
-            z-index: -1
-        }
-
         .swiper-slide {
             align-items: center;
             background: #eee;
             border-radius: .75rem;
             display: flex;
+            flex-shrink: 0;
             justify-content: center;
         }
 
@@ -61,14 +70,28 @@
             border-color: #000;
         }
 
-        /* Demo only: */
-        .swiper.single,
-        .swiper.group {
-            height: 360px;
+        .swiper .swiper-slide {
+            width: 100%;
         }
 
-        .swiper.single .swiper-slide {
-            flex: 0 0 240px;
+        @media (min-width: 480px) {
+
+            .swiper.single .swiper-slide,
+            .swiper.group .swiper-slide {
+                width: 240px;
+                flex-shrink: 0;
+            }
+
+            .swiper.page .swiper-slide {
+                width: auto;
+            }
+        }
+
+        /* Demo only: */
+        .swiper.single,
+        .swiper.group,
+        .swiper.page {
+            height: 360px;
         }
 
         .swiper-button-toggle {
@@ -93,9 +116,9 @@
 
 <body>
     <main>
-        <h1>Swiper - Single</h1>
+        <h2>Option A: Move a single slide at a time.</h2>
         <div class="swiper-container">
-            <div class="swiper single" data-autoplay="true" data-view="auto" data-center="true" data-bounds="true">
+            <div class="swiper single" data-autoplay="true" data-mode="single">
                 <div class="swiper-wrapper">
                     <div class="swiper-slide">Slide 1</div>
                     <div class="swiper-slide">Slide 2</div>
@@ -113,9 +136,29 @@
                 <div class="swiper-button-next"></div>
             </div>
         </div>
-        <h1>Swiper - Group</h1>
+        <h2>Option B: Move multiple slides at a time.</h2>
         <div class="swiper-container">
-            <div class="swiper group" data-autoplay="true" data-view="3" data-group="3">
+            <div class="swiper group" data-autoplay="true" data-mode="group">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">Slide 1</div>
+                    <div class="swiper-slide">Slide 2</div>
+                    <div class="swiper-slide">Slide 3</div>
+                    <div class="swiper-slide">Slide 4</div>
+                    <div class="swiper-slide">Slide 5</div>
+                    <div class="swiper-slide">Slide 6</div>
+                    <div class="swiper-slide">Slide 7</div>
+                    <div class="swiper-slide">Slide 8</div>
+                    <div class="swiper-slide">Slide 9</div>
+                    <div class="swiper-slide">Slide 10</div>
+                </div>
+                <div class="swiper-button-toggle"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+        </div>
+        <h2>Option C: Move an exact number of slides at a time.</h2>
+        <div class="swiper-container">
+            <div class="swiper page" data-autoplay="true" data-mode="page" data-view="4" data-group="4">
                 <div class="swiper-wrapper">
                     <div class="swiper-slide">Slide 1</div>
                     <div class="swiper-slide">Slide 2</div>
@@ -150,42 +193,141 @@
 
                 el.setAttribute('tabindex', '0');
 
-                function asBool(value) {
-                    if (value == null) {
-                        return undefined;
-                    } else {
-                        return value === 'true' || value === '1' || value === '';
+                /* ================ Custom helper functions: ================ */
+                const asBool = (value) => {
+                    if (value == null) return undefined;
+                    return value === 'true' || value === '1' || value === '';
+                };
+
+                const asNum = (value) => {
+                    if (value == null || value == '') return undefined;
+                    const number = Number(value);
+                    return Number.isFinite(number) ? number : undefined;
+                };
+
+                const asSlidesPerView = (value) => {
+                    if (value == null || value == '') return undefined;
+                    if (value == 'auto') return 'auto';
+                    const number = Number(value);
+                    return Number.isFinite(number) ? number : undefined;
+                };
+
+                const getMode = (el) => {
+                    return el.dataset.mode ?? 'single';
+                };
+
+                const getSize = (el) => {
+                    return el.dataset.size ?? 'sm';
+                };
+
+                const getSlideViewFor = (el, size) => {
+                    if (size === 'sm') return asNum(el.dataset.viewSm) ?? 1;
+                    if (size === 'md') return asNum(el.dataset.viewMd) ?? 2;
+                    return asNum(el.dataset.viewLg) ?? asNum(el.dataset.view) ?? 3;
+                };
+
+                // const getSpacingFor = (size) => (size === 'sm' ? 10 : size === 'md' ? 16 : 20);
+
+                /* ================ Custom breakpoint functions: ================ */
+                function getConfigFor(el, device, size) {
+                    const mode = el.dataset.mode ?? 'single';
+
+                    const defaultConfig = {
+                        slidesPerView: 1,
+                        slidesPerGroup: 1,
+                        slidesPerGroupAuto: false,
+                        centeredSlides: false,
+                        centeredSlidesBounds: false,
+                        centerInsufficientSlides: false,
+                    };
+
+                    const singleConfig = {
+                        slidesPerView: 'auto',
+                        slidesPerGroup: 1,
+                        slidesPerGroupAuto: false,
+                        centeredSlides: true,
+                        centeredSlidesBounds: true,
+                        centerInsufficientSlides: true,
+                    };
+
+                    const groupConfig = {
+                        slidesPerView: 'auto',
+                        slidesPerGroup: 1,
+                        slidesPerGroupAuto: true,
+                        centeredSlides: false,
+                        centeredSlidesBounds: false,
+                        centerInsufficientSlides: true,
+                    };
+
+                    const pageConfig = {
+                        slidesPerView: 1,
+                        slidesPerGroup: 1,
+                        slidesPerGroupAuto: false,
+                        centeredSlides: false,
+                        centeredSlidesBounds: false,
+                        centerInsufficientSlides: false,
+                    };
+
+                    const evalPageConfig = (el, size) => {
+                        if (size === 'sm') {
+                            return {
+                                slidesPerView: asNum(el.dataset.pageViewSm ?? 2),
+                                slidesPerGroup: asNum(el.dataset.pageGroupSm ?? 2),
+                            };
+                        };
+
+                        if (size === 'md') {
+                            return {
+                                slidesPerView: asNum(el.dataset.pageViewMd ?? 3),
+                                slidesPerGroup: asNum(el.dataset.pageGroupMd ?? 3),
+                            };
+                        };
+
+                        if (size === 'lg') {
+                            return {
+                                slidesPerView: asNum(el.dataset.pageViewLg ?? 4),
+                                slidesPerGroup: asNum(el.dataset.pageGroupLg ?? 4),
+                            };
+                        };
+                    };
+
+                    const desktopConfig = (mode, size) => {
+                        if (mode === 'single') return singleConfig;
+                        if (mode === 'group') return groupConfig;
+
+                        if (mode === 'page') {
+                            return {
+                                ...pageConfig,
+                                ...evalPageConfig(el, size)
+                            };
+                        };
+                    };
+
+                    if (device === 'mobile') {
+                        return {
+                            ...defaultConfig
+                        };
+                    };
+
+                    if (device === 'desktop') {
+                        return desktopConfig(mode, size);
                     };
                 };
 
-                function asNum(value) {
-                    if (value == null || value == '') {
-                        return undefined;
-                    } else {
-                        const number = Number(value);
-                        return Number.isFinite(number) ? number : undefined;
-                    };
-                };
-
-                function asSlidesPerView(value) {
-                    if (value == null || value == '') {
-                        return undefined;
-                    } else if (value == 'auto') {
-                        return 'auto';
-                    } else {
-                        const number = Number(value);
-                        return Number.isFinite(number) ? number : undefined;
-                    };
-                };
-
+                /* ================ Swiper configuration: ================ */
                 const swiper = new Swiper(el, {
+                    // 1. Accessibility config:
                     a11y: asBool(el.dataset.a11y) ?? true,
                     keyboard: asBool(el.dataset.keyboard) ?? true,
+
+                    // 2. Control config:
                     navigation: (prevButton && nextButton) ? {
                         prevEl: prevButton,
                         nextEl: nextButton,
                         addIcons: asBool(el.dataset.icons) ?? false
                     } : undefined,
+
+                    // 3. Motion config:
                     rewind: asBool(el.dataset.rewind) ?? true,
                     loop: asBool(el.dataset.loop) ?? false,
                     simulateTouch: asBool(el.dataset.touch) ?? true,
@@ -194,15 +336,41 @@
                         pauseOnMouseEnter: asBool(el.dataset.pause) ?? true,
                     } : false,
                     speed: asNum(el.dataset.speed) ?? 500,
-                    spaceBetween: asNum(el.dataset.space) ?? 16,
-                    slidesPerView: asSlidesPerView(el.dataset.view) ?? 'auto',
-                    slidesPerGroup: asNum(el.dataset.group) ?? 1,
+
+                    // 4. Breakpoint config:
+                    // Note: SETTINGS DO NOT INHERIT/CASCADE LIKE CSS!
+                    //       Empty breakpoint objects will return default Swiper settings,
+                    //       and anything omitted will also be reset.
+                    breakpoints: {
+                        0: {
+                            spaceBetween: 10,
+                            ...getConfigFor(el, 'mobile')
+                        },
+                        480: {
+                            spaceBetween: 14,
+                            ...getConfigFor(el, 'desktop', 'sm')
+                        },
+                        640: {
+                            spaceBetween: 16,
+                            ...getConfigFor(el, 'desktop', 'md')
+                        },
+                        960: {
+                            spaceBetween: 20,
+                            ...getConfigFor(el, 'desktop', 'lg')
+                        },
+                        // 1280: {}
+                    },
+
+                    // 5. Other config:
                     initialSlide: asNum(el.dataset.initial) ?? 0,
-                    centeredSlides: asBool(el.dataset.center) ?? false,
-                    centeredSlidesBounds: asBool(el.dataset.bounds) ?? false,
-                    updateOnWindowResize: asBool(el.dataset.update) ?? true
+                    updateOnWindowResize: asBool(el.dataset.update) ?? true,
                 });
 
+                /* ================ Swiper updates ================ */
+                requestAnimationFrame(() => swiper.update());
+                swiper.on('breakpoint', () => swiper.update());
+
+                /* ================ Custom navigation controls ================ */
                 if (prevButton) {
                     prevButton.innerHTML = '&#128896';
                 };
