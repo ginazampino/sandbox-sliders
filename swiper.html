@@ -30,7 +30,6 @@
             background: #eee;
             border-radius: .75rem;
             display: flex;
-            flex-shrink: 0;
             justify-content: center;
         }
 
@@ -70,16 +69,11 @@
             border-color: #000;
         }
 
-        .swiper .swiper-slide {
-            width: 100%;
-        }
-
         @media (min-width: 480px) {
 
             .swiper.single .swiper-slide,
             .swiper.group .swiper-slide {
                 width: 240px;
-                flex-shrink: 0;
             }
 
             .swiper.page .swiper-slide {
@@ -207,7 +201,7 @@
 
                 const parseNumList = (value) => {
                     if (!value) return [];
-                    return values = value
+                    return value
                         .split(',')
                         .map((string) => Number(string.trim()))
                         .filter((number) => Number.isFinite(number) && number > 0);
@@ -228,17 +222,8 @@
                 };
 
                 /* ================ Custom breakpoint functions: ================ */
-                function getConfigFor(el, device, size) {
+                function getConfigFor(el, size) {
                     const mode = el.dataset.mode ?? 'single';
-
-                    const defaultConfig = {
-                        slidesPerView: 1,
-                        slidesPerGroup: 1,
-                        slidesPerGroupAuto: false,
-                        centeredSlides: false,
-                        centeredSlidesBounds: false,
-                        centerInsufficientSlides: false,
-                    };
 
                     const singleConfig = {
                         slidesPerView: 'auto',
@@ -246,7 +231,7 @@
                         slidesPerGroupAuto: false,
                         centeredSlides: true,
                         centeredSlidesBounds: true,
-                        centerInsufficientSlides: true,
+                        centerInsufficientSlides: true
                     };
 
                     const groupConfig = {
@@ -255,7 +240,7 @@
                         slidesPerGroupAuto: true,
                         centeredSlides: false,
                         centeredSlidesBounds: false,
-                        centerInsufficientSlides: true,
+                        centerInsufficientSlides: true
                     };
 
                     const pageConfig = {
@@ -264,67 +249,30 @@
                         slidesPerGroupAuto: false,
                         centeredSlides: false,
                         centeredSlidesBounds: false,
-                        centerInsufficientSlides: false,
+                        centerInsufficientSlides: false
                     };
 
-                    // const evalPageConfig = (el, size) => {
-                    //     if (size === 'sm') {
-                    //         return {
-                    //             slidesPerView: asNum(el.dataset.pageViewSm ?? 2),
-                    //             slidesPerGroup: asNum(el.dataset.pageGroupSm ?? 2),
-                    //         };
-                    //     };
+                    if (mode === 'single') return singleConfig;
+                    if (mode === 'group') return groupConfig;
 
-                    //     if (size === 'md') {
-                    //         return {
-                    //             slidesPerView: asNum(el.dataset.pageViewMd ?? 3),
-                    //             slidesPerGroup: asNum(el.dataset.pageGroupMd ?? 3),
-                    //         };
-                    //     };
+                    if (mode === 'page') {
+                        const amount = getPageCountFor(el, size);
 
-                    //     if (size === 'lg') {
-                    //         return {
-                    //             slidesPerView: asNum(el.dataset.pageViewLg ?? 4),
-                    //             slidesPerGroup: asNum(el.dataset.pageGroupLg ?? 4),
-                    //         };
-                    //     };
-                    // };
-
-                    const desktopConfig = (mode, size) => {
-                        if (mode === 'single') return singleConfig;
-                        if (mode === 'group') return groupConfig;
-
-                        if (mode === 'page') {
-                            const amount = getPageCountFor(el, size);
-
-                            return {
-                                ...pageConfig,
-                                slidesPerView: amount,
-                                slidesPerGroup: amount,
-                                slidesPerGroupAuto: false,
-                                centeredSlides: false,
-                                centeredSlidesBounds: false,
-                                centerInsufficientSlides: false,
-                            };
-                        };
-                    };
-
-                    if (device === 'mobile') {
                         return {
-                            ...defaultConfig
+                            ...pageConfig,
+                            slidesPerView: amount,
+                            slidesPerGroup: amount
                         };
                     };
 
-                    if (device === 'desktop') {
-                        return desktopConfig(mode, size);
-                    };
+                    return singleConfig;
                 };
 
                 /* ================ Swiper configuration: ================ */
                 const swiper = new Swiper(el, {
                     // 1. Accessibility config:
-                    a11y: asBool(el.dataset.a11y) ?? true,
-                    keyboard: asBool(el.dataset.keyboard) ?? true,
+                    a11y: true,
+                    keyboard: true,
 
                     // 2. Control config:
                     navigation: (prevButton && nextButton) ? {
@@ -334,39 +282,41 @@
                     } : undefined,
 
                     // 3. Motion config:
+                    autoplay: (asBool(el.dataset.autoplay) ?? false) ? {
+                        delay: asNum(el.dataset.delay) ?? 3000,
+                        pauseOnMouseEnter: true,
+                    } : false,
+                    speed: asNum(el.dataset.speed) ?? 500,
                     rewind: asBool(el.dataset.rewind) ?? true,
                     loop: asBool(el.dataset.loop) ?? false,
                     simulateTouch: asBool(el.dataset.touch) ?? true,
-                    autoplay: (asBool(el.dataset.autoplay) ?? false) ? {
-                        delay: asNum(el.dataset.delay) ?? 3000,
-                        pauseOnMouseEnter: asBool(el.dataset.pause) ?? true,
-                    } : false,
-                    speed: asNum(el.dataset.speed) ?? 500,
 
                     // 4. Breakpoint config:
-                    // Note: SETTINGS DO NOT INHERIT/CASCADE LIKE CSS!
-                    //       Empty breakpoint objects will return default Swiper settings,
-                    //       and anything omitted will also be reset.
+                    /* Note: 
+                        SETTINGS DO NOT INHERIT/CASCADE LIKE CSS!
+                        Empty breakpoint objects will return default Swiper settings,
+                        and anything omitted will also be reset.
+                    */
                     breakpoints: {
                         0: {
                             spaceBetween: 10,
-                            ...getConfigFor(el, 'mobile')
+                            ...getConfigFor(el, 'sm')
                         },
                         480: {
                             spaceBetween: 14,
-                            ...getConfigFor(el, 'desktop', 'sm')
+                            ...getConfigFor(el, 'sm')
                         },
                         640: {
                             spaceBetween: 16,
-                            ...getConfigFor(el, 'desktop', 'md')
+                            ...getConfigFor(el, 'md')
                         },
                         960: {
                             spaceBetween: 20,
-                            ...getConfigFor(el, 'desktop', 'lg')
+                            ...getConfigFor(el, 'lg')
                         },
                         1280: {
                             spaceBetween: 20,
-                            ...getConfigFor(el, 'desktop', 'xl')
+                            ...getConfigFor(el, 'xl')
                         }
                     },
 
@@ -374,10 +324,6 @@
                     initialSlide: asNum(el.dataset.initial) ?? 0,
                     updateOnWindowResize: asBool(el.dataset.update) ?? true,
                 });
-
-                /* ================ Swiper updates ================ */
-                requestAnimationFrame(() => swiper.update());
-                swiper.on('breakpoint', () => swiper.update());
 
                 /* ================ Custom navigation controls ================ */
                 if (prevButton) {
