@@ -158,7 +158,7 @@
         </div>
         <h2>Option C: Move an exact number of slides at a time.</h2>
         <div class="swiper-container">
-            <div class="swiper page" data-autoplay="true" data-mode="page" data-view="4" data-group="4">
+            <div class="swiper page" data-autoplay="true" data-mode="page" data-page="1,2,3,4">
                 <div class="swiper-wrapper">
                     <div class="swiper-slide">Slide 1</div>
                     <div class="swiper-slide">Slide 2</div>
@@ -205,28 +205,27 @@
                     return Number.isFinite(number) ? number : undefined;
                 };
 
-                const asSlidesPerView = (value) => {
-                    if (value == null || value == '') return undefined;
-                    if (value == 'auto') return 'auto';
-                    const number = Number(value);
-                    return Number.isFinite(number) ? number : undefined;
+                const parseNumList = (value) => {
+                    if (!value) return [];
+                    return values = value
+                        .split(',')
+                        .map((string) => Number(string.trim()))
+                        .filter((number) => Number.isFinite(number) && number > 0);
                 };
 
-                const getMode = (el) => {
-                    return el.dataset.mode ?? 'single';
-                };
+                const getPageCountFor = (el, size) => {
+                    const list = parseNumList(el.dataset.page);
 
-                const getSize = (el) => {
-                    return el.dataset.size ?? 'sm';
-                };
+                    const sm = list[0] ?? 1;
+                    const md = list[1] ?? sm;
+                    const lg = list[2] ?? md;
+                    const xl = list[3] ?? lg;
 
-                const getSlideViewFor = (el, size) => {
-                    if (size === 'sm') return asNum(el.dataset.viewSm) ?? 1;
-                    if (size === 'md') return asNum(el.dataset.viewMd) ?? 2;
-                    return asNum(el.dataset.viewLg) ?? asNum(el.dataset.view) ?? 3;
+                    if (size === 'sm') return sm;
+                    if (size === 'md') return md;
+                    if (size === 'lg') return lg;
+                    return xl;
                 };
-
-                // const getSpacingFor = (size) => (size === 'sm' ? 10 : size === 'md' ? 16 : 20);
 
                 /* ================ Custom breakpoint functions: ================ */
                 function getConfigFor(el, device, size) {
@@ -268,37 +267,44 @@
                         centerInsufficientSlides: false,
                     };
 
-                    const evalPageConfig = (el, size) => {
-                        if (size === 'sm') {
-                            return {
-                                slidesPerView: asNum(el.dataset.pageViewSm ?? 2),
-                                slidesPerGroup: asNum(el.dataset.pageGroupSm ?? 2),
-                            };
-                        };
+                    // const evalPageConfig = (el, size) => {
+                    //     if (size === 'sm') {
+                    //         return {
+                    //             slidesPerView: asNum(el.dataset.pageViewSm ?? 2),
+                    //             slidesPerGroup: asNum(el.dataset.pageGroupSm ?? 2),
+                    //         };
+                    //     };
 
-                        if (size === 'md') {
-                            return {
-                                slidesPerView: asNum(el.dataset.pageViewMd ?? 3),
-                                slidesPerGroup: asNum(el.dataset.pageGroupMd ?? 3),
-                            };
-                        };
+                    //     if (size === 'md') {
+                    //         return {
+                    //             slidesPerView: asNum(el.dataset.pageViewMd ?? 3),
+                    //             slidesPerGroup: asNum(el.dataset.pageGroupMd ?? 3),
+                    //         };
+                    //     };
 
-                        if (size === 'lg') {
-                            return {
-                                slidesPerView: asNum(el.dataset.pageViewLg ?? 4),
-                                slidesPerGroup: asNum(el.dataset.pageGroupLg ?? 4),
-                            };
-                        };
-                    };
+                    //     if (size === 'lg') {
+                    //         return {
+                    //             slidesPerView: asNum(el.dataset.pageViewLg ?? 4),
+                    //             slidesPerGroup: asNum(el.dataset.pageGroupLg ?? 4),
+                    //         };
+                    //     };
+                    // };
 
                     const desktopConfig = (mode, size) => {
                         if (mode === 'single') return singleConfig;
                         if (mode === 'group') return groupConfig;
 
                         if (mode === 'page') {
+                            const amount = getPageCountFor(el, size);
+
                             return {
                                 ...pageConfig,
-                                ...evalPageConfig(el, size)
+                                slidesPerView: amount,
+                                slidesPerGroup: amount,
+                                slidesPerGroupAuto: false,
+                                centeredSlides: false,
+                                centeredSlidesBounds: false,
+                                centerInsufficientSlides: false,
                             };
                         };
                     };
@@ -358,7 +364,10 @@
                             spaceBetween: 20,
                             ...getConfigFor(el, 'desktop', 'lg')
                         },
-                        // 1280: {}
+                        1280: {
+                            spaceBetween: 20,
+                            ...getConfigFor(el, 'desktop', 'xl')
+                        }
                     },
 
                     // 5. Other config:
